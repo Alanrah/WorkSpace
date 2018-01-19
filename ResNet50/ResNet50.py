@@ -13,4 +13,3 @@ x = preprocess_input(x)
 
 preds = model.predict(x)
 print('Predicted:', decode_predictions(preds, top=3)[0])
-# Predicted: [(u'n02504013', u'Indian_elephant', 0.82658225), (u'n01871265', u'tusker', 0.1122357), (u'n02504458', u'African_elephant', 0.061040461)]
