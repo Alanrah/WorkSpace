@@ -5,6 +5,8 @@ from keras.preprocessing import image
 from keras.applications.imagenet_utils import preprocess_input, decode_predictions
 from keras.applications.resnet50 import ResNet50
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 # 网络上图片的地址
 
 classesOfServer机架式 = ['projector','desktop_computer','scoreboard','hard_disc','modem','remote_control','radio', 'notebook','computer_keyboard','projector','printer','tape_player','cassette_player','scoreboard','monitor','web_site','harmonica','laptop']
@@ -12,7 +14,7 @@ classesOfServer机架式 = ['projector','desktop_computer','scoreboard','hard_di
 classesOfSwitch = ['modem','radio','safe','tape_player','switch','CD_player','cassette_player','abacus']
 classesOfPrinter = ['printer','photocopier','tape_player','cassette_player','CD_player','switch','Polaroid_camera','holster','sewing_machine','projector']
 classesOfServer塔式 = ['desktop_computer','hard_disc','binder','modem','switch','radio','notebook','CD_player',
-                     'tape_player','cassette_player','space_heater','solar_dish','cash_machine','scoreboard',,'safe','menu']
+                     'tape_player','cassette_player','space_heater','solar_dish','cash_machine','scoreboard','safe','menu']
 classesOfCabinet = ['pay-phone','cash_machine','vending_machine','turnstile','switch','refrigerator','medicine_chest','typewriter_keyboard','modem','monitor','web_site','envelope','Band_Aid','muzzle','whistle','space_bar','desktop_computer',
                     'photocopier','microwave','safe']
 classesOfRouter = ['sandal','spatula','swab','rubber_eraser','ballpoint','toilet_seat','goblet','matchstick','lipstick','rubber_eraser','rocking_chair','scale','hook','mosquito_net','modem']
@@ -47,15 +49,19 @@ def getfilelist(filepath):
         filename = filelist[num]
         if os.path.isdir(filepath + "/" + filename):
             os.chdir(filepath + "/" + filename)
-            print("1 %s"%(filepath + "/" + filename))
+            #如果不为空遍历识别，如果为空删除
+            #if os.path.getsize(filepath + "/" + filename):
+            print("文件夹 %s "%(filepath + "/" + filename))
             getfilelist(filepath + "/" + filename)
-
+            '''                else:
+                new = '1-' + filename
+                os.rename(filename, new)
+                print(" %s 为空，删除" %(filepath + "/" + filename))'''
         else:
             name, ext = os.path.splitext(filename)
             if ext in pic_ext:
-                print("2  %s"%filename)
+                print("图片  %s"%filename)
                 ResNet(filename)
-
 path = 'E:/DeepLearning/spiderResult/服务器'
 os.chdir(path)
 getfilelist(path)
