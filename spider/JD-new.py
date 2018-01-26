@@ -15,7 +15,7 @@ class spiders:
         s = (page//2) *60 +1
         #psort=4&
         self.url = 'https://search.jd.com/Search?keyword=' + keyword + '&enc=utf-8&qrst=1&rt=1&stop=1&vt=2&wq=' + keyword + '&page=' + str(
-            page)+'&s='+str(s)+'&click=0'
+            page)+'&s='+str(s)+'&psort=4&click=0'
         self.headers = {'User-Agent': 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'}
         self.search_urls = 'https://search.jd.com/s_new.php?keyword=' + keyword + '&enc=utf-8&qrst=1&rt=1&stop=1&vt=2&offset=3&wq=' + keyword + '&page={0}&s=26&scrolling=y&pos=30&show_items={1}'
         self.pids = set()  # 页面中所有的id,用来拼接剩下的30张图片的url,使用集合可以有效的去重
@@ -228,7 +228,7 @@ class spiders:
                 print(t_path)
 
                 #爬取该item主页
-                self.get_index(self.ahrefs[id])
+               # self.get_index(self.ahrefs[id])
 
                 #爬取该item的comments
                 maxPage = imgCommentCount//10+1
@@ -349,7 +349,7 @@ def convertSrc(src):
 def ahref (id):
     return ('https://item.jd.com/'+id+'.html')
 
-keywordsCabinet = ['打印机','集线器','交换机']
+keywordsCabinet = ['机架式服务器 惠普']
 
 for j in keywordsCabinet:
     print(j)
