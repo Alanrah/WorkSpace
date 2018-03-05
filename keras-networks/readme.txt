@@ -30,7 +30,5 @@ ImportError: numpy.core.multiarray failed to import
 问题解决：
 http://blog.csdn.net/baobao3456810/article/details/52177316
 
-还是失败，numpy有问题
-
 
 
