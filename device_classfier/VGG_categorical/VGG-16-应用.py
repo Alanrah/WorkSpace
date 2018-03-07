@@ -46,12 +46,14 @@ x = Dense(4096, activation='relu', name='fc1')(x)
 x = Dense(4096, activation='relu', name='fc2')(x)
 x = Dense(classes, activation='softmax', name='predictions')(x)
 '''
-model = applications.VGG16(weights='imagenet')
+model = applications.VGG16('fine_tune_model.h5')
+
 img = image.load_img('DELL-R230.jpg', target_size=(224, 224))
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 preds = model.predict(x)
+print(preds.shape)
 # decode_predictions 输出5个最高概率：(类名, 语义概念, 预测概率) decode_predictions(y_pred)
 for results in decode_predictions(preds):
     for result in results:
