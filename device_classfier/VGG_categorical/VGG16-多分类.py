@@ -50,12 +50,14 @@ train_generator = train_datagen.flow_from_directory(
     target_size=(img_width, img_height),
     batch_size=batch_size,
     class_mode='categorical')
-
+print(train_generator.class_indices)
 validation_generator = test_datagen.flow_from_directory(
     validation_data_dir,
     target_size=(img_width, img_height),
     batch_size=batch_size,
     class_mode='categorical')
+#print(validation_generator.class_indices)
+#{'交换机': 0, '塔式服务器': 1, '打印机': 2, '机架式服务器': 3, '机柜': 4, '路由器': 5}
 def self_VGG():
     global history
     if K.image_data_format() == 'channels_first':
@@ -85,7 +87,7 @@ def self_VGG():
     model.summary()
     plot_model(model, to_file='设备分类器1.png', show_shapes=True)
     model.compile(loss='categorical_crossentropy',
-                  optimizer='rmsprop',
+                  optimizer='adam',
                   metrics=['accuracy'])
     # this is the augmentation configuration we will use for training
     history = model.fit_generator(
@@ -96,8 +98,8 @@ def self_VGG():
         validation_data=validation_generator,
         validation_steps=nb_validation_samples // batch_size
     )
-    model.save('fine_tune_model.h5')
-    model.save_weights('categorical.h5')
+    model.save('fine_tune_model-adam-lr=0.0001.h5')
+    model.save_weights('categorical-adam-lr=0.0001.h5')
     return model
 
 model = self_VGG()

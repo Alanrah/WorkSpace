@@ -7,7 +7,7 @@ from keras import backend as K
 from keras.utils import np_utils
 from keras.utils import plot_model
 from keras.preprocessing import image
-from keras.applications.imagenet_utils import preprocess_input, decode_predictions
+from keras.applications.imagenet_utils import preprocess_input
 
 from keras.callbacks import History
 from keras.models import Model
@@ -39,22 +39,22 @@ def vgg_device(weights_path=None):
     model.add(Dropout(0.5))
     model.add(Dense(6))
     model.add(Activation('softmax'))
-    model.summary()
-    plot_model(model, to_file='设备分类器1.png', show_shapes=True)
     model.compile(loss='categorical_crossentropy',
                   optimizer='rmsprop',
                   metrics=['accuracy'])
     if weights_path:
         model.load_weights(weights_path)
     return model
-model = vgg_device('categorical.h5')
-img = image.load_img('DELL-R230.jpg', target_size=(150, 150))
+model = vgg_device('fine_tune_model.h5')
+img = image.load_img('5a1d070cNac7f303e.jpg', target_size=(150, 150))
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 preds = model.predict(x)
-print (preds)
+#{'交换机': 0, '塔式服务器': 1, '打印机': 2, '机架式服务器': 3, '机柜': 4, '路由器': 5}
+class_index = ['交换机','塔式服务器','打印机','机架式服务器','机柜','路由器']
+for i in range(0,6):
+    if preds[0][i] == 1:
+        print("识别结果是：%s"%class_index[i])
+
 # decode_predictions 输出5个最高概率：(类名, 语义概念, 预测概率) decode_predictions(y_pred)
-for results in decode_predictions(preds):
-    for result in results:
-        print('Probability %0.2f%% => [%s]' % (100*result[2], result[1]))#result是一个元组（class，probability）、、、、
