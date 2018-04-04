@@ -27,7 +27,7 @@ batch_size = 64  # 16每一个epoch一共9000/batch_size组
 
 
 history = History()
-model_checkpoint = ModelCheckpoint('temp_model.hdf5', monitor='loss', save_best_only=True, period=1)
+model_checkpoint = ModelCheckpoint('temp_modell.hdf5', monitor='loss', save_best_only=True, period=1)
 tb_cb = keras.callbacks.TensorBoard(log_dir='log', write_images=1, histogram_freq=0)
 callbacks = [
     history,
@@ -87,7 +87,7 @@ def self_VGG():
     model.summary()
     plot_model(model, to_file='设备分类器1.png', show_shapes=True)
     model.compile(loss='categorical_crossentropy',
-                  optimizer='adam',
+                  optimizer='nadam',
                   metrics=['accuracy'])
     # this is the augmentation configuration we will use for training
     history = model.fit_generator(
@@ -98,15 +98,15 @@ def self_VGG():
         validation_data=validation_generator,
         validation_steps=nb_validation_samples // batch_size
     )
-    model.save('1fine_tune_model-adam-lr=0.0001.h5')
-    model.save_weights('1categorical-adam-lr=0.0001.h5')
+    model.save('fine_tune_model-Ndam-lr=0.0002.h5')
+    model.save_weights('categorical-Nadam-lr=0.0002.h5')
     return model
 
 model = self_VGG()
 from matplotlib import pyplot as plt
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
-plt.title('1model with adam batch=64 lr=0.001 decay=1')
+plt.title('model acc with nadam batch=64 lr=0.0002')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
@@ -114,7 +114,7 @@ plt.show()
 # summarize history for loss
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
-plt.title('1model loss')
+plt.title('model loss with nadam batch=64 lr=0.0002')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')

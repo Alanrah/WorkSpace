@@ -42,7 +42,7 @@ def baseline_model():
     model.add(Dense(num_classes, activation='softmax'))
 
     model.summary()
-    plot_model(model, to_file='6层CNN.png', show_shapes=True)
+    plot_model(model, to_file='i-want.png', show_shapes=True)
 
     # Compile model
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -52,7 +52,7 @@ def baseline_model():
 model = baseline_model()
 
 history = History()
-model_checkpoint = ModelCheckpoint('temp_model.hdf5', monitor='loss', save_best_only=True,period=1)
+model_checkpoint = ModelCheckpoint('i-want.hdf5', monitor='loss', save_best_only=True,period=1)
 tb_cb = keras.callbacks.TensorBoard(log_dir='log', write_images=1, histogram_freq=0)
 callbacks = [
         history,
@@ -61,7 +61,7 @@ callbacks = [
     ]
 
 # Fit the model
-history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=20, batch_size=200, verbose=2)
+history = model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=200, batch_size=64, verbose=2)
 model.save_weights('6-layers-CNN.h5')
 # Final evaluation of the model
 scores = model.evaluate(X_test, y_test, verbose=0)
@@ -71,7 +71,7 @@ print("Baseline Error: %.2f%%" % (100-scores[1]*100))
 from matplotlib import pyplot as plt
 plt.plot()
 plt.plot(history.history['val_acc'])
-plt.title('model accuracy')
+plt.title('model accuracy with adam lr=0.001 batch_size=64')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
@@ -79,7 +79,7 @@ plt.show()
 # summarize history for loss
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
-plt.title('model loss')
+plt.title('model loss with adam lr=0.001 batch_size=64')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
