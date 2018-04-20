@@ -14,6 +14,12 @@ from keras.models import Model
 from keras.callbacks import ModelCheckpoint
 import keras
 
+def maxIndexOfList(list):
+    x = max(list);
+    for index,value in enumerate(list):
+        if value == x:
+            return index;
+
 def vgg_device(weights_path=None):
     img_width, img_height = 150, 150
     if K.image_data_format() == 'channels_first':
@@ -45,16 +51,20 @@ def vgg_device(weights_path=None):
     if weights_path:
         model.load_weights(weights_path)
     return model
-model = vgg_device('fine_tune_model.h5')
-img = image.load_img('5a1d070cNac7f303e.jpg', target_size=(150, 150))
+model = vgg_device('fine_tune_model-adam-lr=0.0001-batch=100.h5')
+img = image.load_img('uploads/mmexport1523343801056.jpg', target_size=(150, 150))
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
+
+print(proba)
 preds = model.predict(x)
 #{'交换机': 0, '塔式服务器': 1, '打印机': 2, '机架式服务器': 3, '机柜': 4, '路由器': 5}
 class_index = ['交换机','塔式服务器','打印机','机架式服务器','机柜','路由器']
-for i in range(0,6):
-    if preds[0][i] == 1:
-        print("识别结果是：%s"%class_index[i])
+print(preds[0])
+list = preds[0];
+
+index = maxIndexOfList(list);
+print("识别结果是：%s"%class_index[index])
 
 # decode_predictions 输出5个最高概率：(类名, 语义概念, 预测概率) decode_predictions(y_pred)
