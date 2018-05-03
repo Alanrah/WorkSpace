@@ -4,7 +4,6 @@ from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 import cv2
 import os
-import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
@@ -16,19 +15,20 @@ from keras.models import Model
 from keras.callbacks import History
 from keras.callbacks import ModelCheckpoint
 import keras.callbacks
+from sklearn.metrics import roc_auc_score
+import numpy as np
 import keras
 
 CLASS_NUM = 6
 norm_size = 224
 
-# dimensions of our images.
 img_width, img_height = 224, 224
-train_data_dir = 'E:/DeepLearning/workSpace/venv/device_img/train/'
-validation_data_dir = 'E:/DeepLearning/workSpace/venv/device_img/validations/'
-nb_train_samples = 36000  # 1500*6=9000，2000张训练图片构成的数据集，图片名可不遵循规则
-nb_validation_samples = 4800  # 100*6=600张验证集
+train_data_dir = 'E:/DeepLearning/workSpace/venv/device_img/train-roc/'
+validation_data_dir = 'E:/DeepLearning/workSpace/venv/device_img/validation-roc/'
+nb_train_samples = 6000  # 1500*6=9000，2000张训练图片构成的数据集，图片名可不遵循规则
+nb_validation_samples = 1799  # 100*6=600张验证集
 epochs = 2
-batch_size = 64  # 16每一个epoch一共9000/batch_size组
+batch_size = 32  # 16每一个epoch一共9000/batch_size组
 
 train_datagen = ImageDataGenerator(
         rescale=1. / 255,
@@ -101,23 +101,75 @@ def load_data(path):
     labels = np.array(labels)
     labels = to_categorical(labels, num_classes=CLASS_NUM)
     print("4+%s"%labels[0])
-
-    # convert the labels from integers to vectors
-    #labels = to_categorical(labels, num_classes=CLASS_NUM)
     return data, labels
-
+print(len(train_generator))
+trainX=train_generator[0]
+trainY=train_generator[1]
 testX,testY = load_data(validation_data_dir)
+print(trainX.shape)
 print(testX.shape)
-print(testY)
 
-history = History()
-model_checkpoint = ModelCheckpoint('vgg19.hdf5', monitor='loss', save_best_only=True, period=1)
-tb_cb = keras.callbacks.TensorBoard(log_dir='log', write_images=1, histogram_freq=1)
-callbacks = [
+
+class roc_callback(keras.callbacks.Callback):
+    def __init__(self, trainX,trainY, testX,testY):
+        self.x = trainX
+        self.y = trainY
+        self.x_val = testX
+        self.y_val = testY
+    def on_train_begin(self, logs={}):
+        return
+    def on_train_end(self, logs={}):
+        return
+    def on_epoch_begin(self, epoch, logs={}):
+        return
+    def on_epoch_end(self, epoch, logs={}):
+        y_pred = self.model.predict(self.x)
+        roc = roc_auc_score(self.y, y_pred)
+        y_pred_val = self.model.predict(self.x_val)
+        roc_val = roc_auc_score(self.y_val, y_pred_val)
+        print('\rroc-auc: %s - roc-auc_val: %s' % (str(round(roc, 4)), str(round(roc_val, 4))), end=100 * ' ' + '\n')
+        return
+    def on_batch_begin(self, batch, logs={}):
+        return
+    def on_batch_end(self, batch, logs={}):
+        return
+
+class Histories(keras.callbacks.Callback):
+    def on_train_begin(self, logs={}):
+        self.aucs = []
+        self.losses = []
+    def on_train_end(self, logs={}):
+        return
+    def on_epoch_begin(self, epoch, logs={}):
+        return
+    def on_epoch_end(self, epoch, logs={}):
+        self.losses.append(logs.get('loss'))
+        y_pred = self.model.predict(self.validation_data[0:2])
+        yp = []
+        for i in range(0, len(y_pred)):
+            yp.append(y_pred[i][0])
+        yt = []
+        for x in self.validation_data[2]:
+            yt.append(x[0])
+        auc = roc_auc_score(yt, yp)
+        self.aucs.append(auc)
+        print('val-loss', logs.get('loss'), ' val-auc: ', auc)
+        print('\n')
+        return
+    def on_batch_begin(self, batch, logs={}):
+        return
+    def on_batch_end(self, batch, logs={}):
+        return
+
+histories = Histories()
+callbacks = [roc_callback(trainX,trainY, testX,testY)]
+model_checkpoint = ModelCheckpoint('keras-tensorboard1.hdf5', monitor='loss', save_best_only=True, period=1)
+tb_cb = keras.callbacks.TensorBoard(log_dir='log', write_images=1, histogram_freq=0)
+'''callbacks = [
     history,
     model_checkpoint,
     tb_cb
-]
+]'''
 
 def self_VGG():
     global history
@@ -167,21 +219,21 @@ def self_VGG():
                   optimizer='adam',
                   metrics=['accuracy'])
     model.summary()
-    plot_model(model, to_file='vgg19classfier.png', show_shapes=True)
+    plot_model(model, to_file='keras-tensorboard.png', show_shapes=True)
     model.compile(loss='categorical_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
     # this is the augmentation configuration we will use for training
-    history = model.fit_generator(
-        train_generator,
+    history = model.fit(
+        trainX, trainY,
         steps_per_epoch=nb_train_samples // batch_size,
         epochs=epochs,
         verbose=1,
-        callbacks=callbacks,
+        callbacks=[histories, model_checkpoint, tb_cb],
         validation_data=(testX,testY),
         validation_steps=nb_validation_samples // batch_size
     )
-    model.save_weights('vgg19classfier.h5')
+    model.save_weights('keras-tensorboard.h5')
     return model
 
 model = self_VGG()

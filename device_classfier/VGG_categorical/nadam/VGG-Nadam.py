@@ -98,6 +98,8 @@ def self_VGG():
         validation_data=validation_generator,
         validation_steps=nb_validation_samples // batch_size
     )
+    scores = model.evaluate(validation_generator[0], validation_generator[1], verbose=0)
+    print("Baseline Error: %.2f%%" % (100 - scores[1] * 100))
     model.save('fine_tune_model-Ndam-lr=0.0002.h5')
     model.save_weights('categorical-Nadam-lr=0.0002.h5')
     return model
